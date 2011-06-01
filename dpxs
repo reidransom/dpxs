@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# wdadpx -i input_folder -o output_basename
+
+usage()
+{
+cat << EOF
+usage: $0 -i input_folder -n output_basename -s starting_frame
+
+This script uses ImageMagick to convert a sequence of .tif images to .dpx 
+images, then rename them per Walt Disney Animation's DPX delivery specs.
+
+EOF
+}
+
+IN=
+OUT=
+START_FRAME=
+while getopts "h:i:o:s:" OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 1
+            ;;
+        i)
+            IN=$OPTARG
+            ;;
+        o)
+            OUT=$OPTARG
+            ;;
+        s)
+            START_FRAME=$OPTARG
+            ;;
+        ?)
+            usage
+            exit
+            ;;
+    esac
+done
+
+#echo $IN
+#echo $OUT
+#echo $START_FRAME
+#exit
+
+cd $IN
+
+if [ -d $OUT ] ; then
+    echo "Directory \"$OUT\" already exists."
+    exit 1
+else
+    mkdir $OUT
+fi
+
+FRAME_NUM=$START_FRAME
+for TIF_FILE in *.tif
+do
+    mogrify -depth 10 -format dpx "${TIF_FILE}"
+    BASE_FILE=`basename "${TIF_FILE}" .tif`
+    mv "${BASE_FILE}.dpx" "${OUT}/${OUT}_${FRAME_NUM}.dpx"
+    let FRAME_NUM=FRAME_NUM+1
+done
+say doneski 2> /dev/null
